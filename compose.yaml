@@ -1,0 +1,91 @@
+x-wordpress-environment: &wordpress-environment
+  WORDPRESS_DB_HOST: db:3306
+  WORDPRESS_DB_NAME: ${DB_NAME:?Run npm run setup}
+  WORDPRESS_DB_USER: ${DB_USER:?Run npm run setup}
+  WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:?Run npm run setup}
+  WORDPRESS_DEBUG: "1"
+  WORDPRESS_CONFIG_EXTRA: |
+    define( 'WP_ENVIRONMENT_TYPE', 'local' );
+    define( 'WP_DEBUG_LOG', true );
+    define( 'WP_DEBUG_DISPLAY', false );
+    define( 'DISALLOW_FILE_EDIT', true );
+    define( 'AUTOMATIC_UPDATER_DISABLED', true );
+    define( 'WP_AUTO_UPDATE_CORE', false );
+
+x-wordpress-volumes: &wordpress-volumes
+  - wordpress_data:/var/www/html
+  - ./wp-content/themes/starter-theme:/var/www/html/wp-content/themes/starter-theme:ro
+  - ./wp-content/plugins/starter-plugin:/var/www/html/wp-content/plugins/starter-plugin:ro
+
+services:
+  db:
+    image: mariadb:11.4.13-noble@sha256:d1891ede5a559f1086f55053bb8cc1569b0298338c4d72d71725a7f74f6ba620
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_NAME:?Run npm run setup}
+      MARIADB_USER: ${DB_USER:?Run npm run setup}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?Run npm run setup}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Run npm run setup}
+    volumes:
+      - database_data:/var/lib/mysql
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 30s
+
+  wordpress:
+    image: wordpress:7.1.4-php8.3-apache@sha256:6888208af0e3cb93af427c13a434273b07ba353ce9e2d5a29abe3031bb28ea3a
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${HTTP_PORT:-8080}:80"
+    environment: *wordpress-environment
+    volumes: *wordpress-volumes
+    healthcheck:
+      test:
+        - CMD
+        - php
+        - -r
+        - >-
+          $$headers = @get_headers('http://127.0.0.1/wp-login.php');
+          exit($$headers && preg_match('/^HTTP\/\S+ [23]\d\d/', $$headers[0]) ? 0 : 1);
+      interval: 5s
+      timeout: 10s
+      retries: 24
+      start_period: 30s
+
+  wpcli:
+    image: wordpress:cli-2.12.0-php8.3@sha256:6bcc7bb91f5157c4b915e74ee131873e99c1c1ff48f602e4a6f6cd17827305cb
+    profiles: [tools]
+    entrypoint: [wp]
+    # Apache's www-data is UID/GID 33; the Alpine CLI default is UID 82.
+    user: "33:33"
+    working_dir: /var/www/html
+    depends_on:
+      wordpress:
+        condition: service_healthy
+    environment:
+      <<: *wordpress-environment
+      HOME: /tmp
+      WP_CLI_CACHE_DIR: /tmp/wp-cli-cache
+    volumes: *wordpress-volumes
+
+  quality:
+    profiles: [tools]
+    build:
+      context: .
+      dockerfile: docker/quality/Dockerfile
+    working_dir: /workspace
+    environment:
+      COMPOSER_HOME: /tmp/composer
+      COMPOSER_ALLOW_SUPERUSER: "1"
+    volumes:
+      - .:/workspace
+
+volumes:
+  database_data:
+  wordpress_data:

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://schemas.wp.org/wp/7.1/theme.json",
+  "version": 3,
+  "settings": {
+    "appearanceTools": true,
+    "layout": { "contentSize": "44rem", "wideSize": "72rem" },
+    "color": {
+      "defaultPalette": false,
+      "palette": [
+        { "slug": "surface", "name": "Surface", "color": "#ffffff" },
+        { "slug": "ink", "name": "Ink", "color": "#17212b" },
+        { "slug": "muted", "name": "Muted", "color": "#4b5563" },
+        { "slug": "accent", "name": "Accent", "color": "#174ea6" }
+      ]
+    },
+    "spacing": {
+      "units": ["rem", "%", "vw"],
+      "defaultSpacingSizes": false,
+      "spacingSizes": [
+        { "slug": "20", "name": "Small", "size": "0.5rem" },
+        { "slug": "30", "name": "Medium", "size": "1rem" },
+        { "slug": "40", "name": "Large", "size": "1.5rem" },
+        { "slug": "50", "name": "Extra large", "size": "clamp(2rem, 5vw, 4rem)" }
+      ]
+    },
+    "typography": {
+      "fluid": true,
+      "defaultFontSizes": false,
+      "fontFamilies": [
+        { "slug": "system", "name": "System", "fontFamily": "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }
+      ],
+      "fontSizes": [
+        { "slug": "small", "name": "Small", "size": "0.875rem", "fluid": false },
+        { "slug": "medium", "name": "Medium", "size": "1.125rem", "fluid": false },
+        { "slug": "large", "name": "Large", "size": "1.75rem", "fluid": { "min": "1.5rem", "max": "2rem" } },
+        { "slug": "x-large", "name": "Extra large", "size": "2.5rem", "fluid": { "min": "2rem", "max": "3rem" } }
+      ]
+    }
+  },
+  "styles": {
+    "color": { "background": "var:preset|color|surface", "text": "var:preset|color|ink" },
+    "spacing": {
+      "blockGap": "var:preset|spacing|40",
+      "padding": { "left": "var:preset|spacing|40", "right": "var:preset|spacing|40" }
+    },
+    "typography": { "fontFamily": "var:preset|font-family|system", "fontSize": "var:preset|font-size|medium", "lineHeight": "1.65" },
+    "elements": {
+      "link": { "color": { "text": "var:preset|color|accent" } },
+      "heading": { "typography": { "fontWeight": "700", "lineHeight": "1.2" } },
+      "h1": { "typography": { "fontSize": "var:preset|font-size|x-large" } },
+      "h2": { "typography": { "fontSize": "var:preset|font-size|large" } }
+    }
+  },
+  "templateParts": [
+    { "name": "header", "title": "Header", "area": "header" },
+    { "name": "footer", "title": "Footer", "area": "footer" }
+  ]
+}

@@ -1,0 +1,47 @@
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+auth.json
+*.pem
+*.key
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Dependencies and generated output (keep dependency lockfiles)
+node_modules/
+vendor/
+.cache/
+.phpcs-cache
+coverage/
+dist/
+build/
+*.log
+*.tmp
+
+# WordPress runtime must come from Docker, never a backup or core checkout
+/wp-admin/
+/wp-includes/
+/wp-*.php
+/index.php
+/.htaccess
+/xmlrpc.php
+/readme.html
+/license.txt
+/wp-content/*
+!/wp-content/themes/
+!/wp-content/plugins/
+/wp-content/themes/*
+!/wp-content/themes/starter-theme/
+/wp-content/plugins/*
+!/wp-content/plugins/starter-plugin/
+uploads/
+cache/
+backups/
+data/
+db-data/
+*.sql
+*.sql.gz
+*.wpress

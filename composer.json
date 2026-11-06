@@ -1,0 +1,14 @@
+{
+  "name": "starter/wordpress-development",
+  "description": "Development-only WordPress Coding Standards tooling",
+  "type": "project",
+  "license": "GPL-2.0-or-later",
+  "require-dev": {
+    "wp-coding-standards/wpcs": "3.4.1"
+  },
+  "config": {
+    "allow-plugins": false,
+    "sort-packages": true,
+    "platform": { "php": "8.3.0" }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "wordpress-starter-kit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Reusable Docker-based WordPress development starter",
+  "type": "module",
+  "engines": { "node": ">=20.19.0" },
+  "scripts": {
+    "env:init": "node scripts/dev.mjs env-init",
+    "setup": "node scripts/dev.mjs setup",
+    "start": "node scripts/dev.mjs start",
+    "stop": "node scripts/dev.mjs stop",
+    "restart": "node scripts/dev.mjs restart",
+    "logs": "node scripts/dev.mjs logs",
+    "reset": "node scripts/dev.mjs reset",
+    "verify": "node scripts/dev.mjs verify",
+    "verify:static": "node scripts/dev.mjs verify-static",
+    "wp": "node scripts/dev.mjs wp",
+    "quality:install": "node scripts/dev.mjs quality-install",
+    "test": "node --test scripts/workflow.test.mjs"
+  }
+}

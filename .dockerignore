@@ -1,0 +1,4 @@
+**
+!docker/
+!docker/quality/
+!docker/quality/Dockerfile

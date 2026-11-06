@@ -1,0 +1,60 @@
+/*
+Theme Name: Starter Theme
+Description: A minimal block theme using native WordPress blocks and CSS.
+Version: 1.0.0
+Requires at least: 7.1
+Tested up to: 7.1
+Requires PHP: 8.3
+License: GNU General Public License v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: starter-theme
+Tags: full-site-editing
+*/
+
+/* Design tokens live in theme.json and are shared with the editor. */
+@layer starter-base {
+
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+
+	body {
+		margin: 0;
+		overflow-wrap: anywhere;
+	}
+
+	:where(img, video) {
+		max-inline-size: 100%;
+		block-size: auto;
+	}
+
+	:where(a, button, input, select, textarea, summary):focus-visible {
+		outline: 3px solid currentColor;
+		outline-offset: 4px;
+	}
+
+	:where(h1, h2, h3) {
+		text-wrap: balance;
+	}
+
+	:where(p, li) {
+		text-wrap: pretty;
+	}
+
+	:where(main) {
+		min-block-size: 60svh;
+	}
+
+	:where(.wp-block-query-pagination) {
+		gap: var(--wp--preset--spacing--40);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+
+		html {
+			scroll-behavior: auto;
+		}
+	}
+}

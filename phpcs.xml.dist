@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<ruleset name="WordPress Starter">
+  <description>WordPress standards for version-controlled custom PHP.</description>
+  <file>wp-content/themes/starter-theme</file>
+  <file>wp-content/plugins/starter-plugin</file>
+  <arg name="extensions" value="php"/>
+  <arg value="sp"/>
+  <rule ref="WordPress"/>
+  <config name="minimum_wp_version" value="7.1"/>
+  <rule ref="WordPress.WP.I18n">
+    <properties>
+      <property name="text_domain" type="array">
+        <element value="starter-theme"/>
+        <element value="starter-plugin"/>
+      </property>
+    </properties>
+  </rule>
+</ruleset>
