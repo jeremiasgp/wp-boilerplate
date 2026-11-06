@@ -15,6 +15,11 @@ machine-specific absolute path. Inspect existing custom code before scaffolding.
 
 - Keep WordPress core and runtime data outside source control. Do not copy a site
   backup, client branding, credentials or third-party dependencies into the starter.
+- Generate independent projects with `npm run create -- <new-directory>` from the
+  tool root. The destination must not exist and must be outside the source tree.
+  Use `--port 8081` for another concurrent site or `--skip-setup` to configure it
+  before installation. Continue all site work in the generated directory.
+  Never run setup in the generator root to create a new independent project.
 - Use `npm run env:init` to create local configuration. Preserve existing `.env`
   files and secrets. Each simultaneous clone needs a distinct project name and port.
 - Use `npm run setup` only for the intended local project. Rerunning setup must

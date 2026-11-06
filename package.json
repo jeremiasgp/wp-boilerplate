@@ -6,6 +6,7 @@
   "type": "module",
   "engines": { "node": ">=20.19.0" },
   "scripts": {
+    "create": "node scripts/create.mjs",
     "env:init": "node scripts/dev.mjs env-init",
     "setup": "node scripts/dev.mjs setup",
     "start": "node scripts/dev.mjs start",
@@ -17,6 +18,6 @@
     "verify:static": "node scripts/dev.mjs verify-static",
     "wp": "node scripts/dev.mjs wp",
     "quality:install": "node scripts/dev.mjs quality-install",
-    "test": "node --test scripts/workflow.test.mjs"
+    "test": "node --test scripts/workflow.test.mjs scripts/create.test.mjs"
   }
 }

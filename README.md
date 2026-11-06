@@ -1,10 +1,75 @@
-# WordPress development starter
+# Generador de proyectos WordPress
 
-A reusable local development kit with Docker-managed WordPress core, a minimal
-block theme, a minimal plugin and dependency-free Node.js commands. It contains no
-client content. Copy **this directory's source files** into a new project repository,
-excluding ignored local configuration, dependencies and caches. The parent WordPress
-backup is not part of the starter.
+Este repositorio genera el punto de partida de proyectos WordPress independientes
+en otros directorios. Incluye Docker, un tema de bloques, un plugin mínimo,
+comandos Node.js sin dependencias npm e instrucciones para trabajar con IA.
+Los cambios de cada sitio se realizan en su propio directorio.
+
+## Crear un proyecto: paso a paso
+
+1. Instalá Node.js 20.19 o superior y Docker con Compose v2.20 o superior.
+   Iniciá Docker con contenedores Linux. Es la preparación necesaria de la máquina;
+   la herramienta automatiza la instalación del proyecto. La primera ejecución
+   requiere Internet para descargar imágenes y dependencias.
+2. Abrí una terminal en este repositorio y ejecutá, por ejemplo:
+
+   ```powershell
+   npm run create -- "C:\Dev\projects\mi-sitio"
+   ```
+
+   En macOS/Linux, por ejemplo: `npm run create -- ../mi-sitio`.
+   Las rutas relativas se resuelven desde el directorio de ejecución del comando
+   (con npm, normalmente la raíz del paquete). Usá una ruta absoluta para evitar dudas.
+   El destino debe estar fuera del boilerplate y no debe existir, aunque esté vacío.
+3. El comando copia solamente la base reutilizable, genera credenciales e identidad
+   Docker propias, comprueba los archivos y scripts, instala WordPress y las
+   herramientas de calidad y verifica el sitio. No hace falta `npm install`,
+   instalar WordPress desde el navegador ni copiar archivos manualmente.
+4. Abrí `http://localhost:8080` o `http://localhost:8080/wp-admin/`.
+   Las credenciales están en el `.env` privado del nuevo proyecto; no se imprimen.
+5. Abrí la carpeta generada en tu editor. Para trabajar con IA, pedile que lea
+   `AGENTS.md` y la skill pertinente de `.agents/skills`. Modificá presentación en
+   `wp-content/themes/starter-theme` y funcionalidad en
+   `wp-content/plugins/starter-plugin`.
+6. Desde esa carpeta, usá `npm run stop` para detener conservando datos y
+   `npm run start` para volver a trabajar. Ejecutá `npm run verify:static`,
+   `npm test` y `npm run verify` para revisar cambios (el último requiere el sitio
+   iniciado). `npm run reset` elimina datos locales y exige confirmación escrita.
+
+Para otro sitio simultáneo, elegí un puerto libre distinto:
+
+```powershell
+npm run create -- "C:\Dev\projects\otro-sitio" --port 8081
+```
+
+Cada proyecto tiene archivos, contraseñas, identidad y volúmenes Docker propios.
+No se copian `.env` del generador, historial Git, dependencias ni cachés, ni se
+inicializa Git. Los proyectos generados funcionan sin depender de la carpeta
+original y no reciben automáticamente sus futuras actualizaciones.
+
+Para generar archivos sin iniciar Docker, o personalizar la configuración antes
+de instalar WordPress:
+
+```powershell
+npm run create -- "C:\Dev\projects\mi-sitio" --skip-setup
+cd C:\Dev\projects\mi-sitio
+# Editá .env si necesitás cambiar título, usuario, email o puerto/URL.
+npm run setup
+npm run verify
+```
+
+`--skip-setup` genera la configuración y ejecuta las comprobaciones sin Docker.
+Si la instalación falla, conserva el proyecto: corregí el problema y ejecutá
+`npm run setup` y `npm run verify` desde el destino. No repitas `create` sobre
+esa carpeta. Si un puerto está ocupado antes de instalar, cambiá `HTTP_PORT` y
+`WP_URL` juntos en `.env`. Repetir setup conserva una instalación existente.
+
+En PowerShell, si la política de ejecución bloquea `npm.ps1`, usá `npm.cmd`.
+Para consultar las opciones: `npm run create -- --help`.
+No ejecutes setup en la carpeta de la herramienta para crear un sitio nuevo:
+usá `create` y luego trabajá en la carpeta generada.
+
+## Referencia técnica del proyecto generado
 
 ## Requirements and versions
 
@@ -31,7 +96,7 @@ in [docker-library/official-images](https://github.com/docker-library/official-i
 
 ## Quick start
 
-Open a terminal in this directory (for this workspace: `cd starter-kit`), then:
+Open a terminal in the generated project directory, then:
 
 ```text
 npm run setup
@@ -123,7 +188,7 @@ npm run reset -- --env .env.verify
 ## Source and runtime boundaries
 
 ```text
-.agents/skills/                 Six reusable repository-scoped Codex skills
+.agents/skills/                 Six reusable repository-scoped AI skills
 AGENTS.md                      Architecture, security and coding conventions
 compose.yaml                   Official runtime images and persistent volumes
 docker/quality/Dockerfile       Composer + application PHP for development tools
@@ -147,7 +212,7 @@ credentials, dumps, uploads, runtime files and dependencies do not.
 `.gitignore` allowlists the two custom directories. If intentionally adding or
 renaming a custom component, update that allowlist, Compose mounts, text domains,
 PHP names, PHPCS configuration and verification paths together. Do not copy the
-parent backup or initialize Git in it as part of adopting this starter.
+unrelated source or runtime data into a generated project.
 
 The Site Editor stores customizations in the database, which can override file
 templates. Export intended reusable changes into theme files before sharing them.
@@ -158,7 +223,8 @@ The stack does not include a mail catcher or SMTP; configure mail per project.
 `verify:static` checks required files, parseable JSON, essential theme/plugin
 metadata, direct-access guard, skill frontmatter and the secret-free env example.
 `npm test` exercises credential generation/preservation, invalid config rejection,
-argument forwarding, project scoping, reset confirmation and setup rerun behavior.
+argument forwarding, project scoping, reset confirmation, setup rerun behavior,
+independent project generation, destination protection and installation recovery.
 
 `verify` additionally checks Compose validity, Composer manifest/lock consistency,
 PHP syntax, WPCS, installed core version/checksums, plugin activation, theme

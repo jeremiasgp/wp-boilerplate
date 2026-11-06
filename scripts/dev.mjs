@@ -90,6 +90,7 @@ function phpFiles(directory) {
 export function verifyStatic() {
   const required = [
     'AGENTS.md', 'README.md', '.env.example', '.gitignore', 'compose.yaml',
+    'scripts/create.mjs', 'scripts/create.test.mjs',
     'composer.json', 'composer.lock', 'phpcs.xml.dist', 'docker/quality/Dockerfile',
     'wp-content/themes/starter-theme/style.css', 'wp-content/themes/starter-theme/theme.json',
     'wp-content/themes/starter-theme/templates/index.html',

@@ -1,5 +1,27 @@
 # Implementation verification
 
+## Generator verification — 2026-11-06
+
+- Removed the relocation-only CONTEXT.md and committed the reusable baseline.
+- Static verification and all 11 Node tests passed on Windows / Node 20.20.1.
+  Generator tests cover independent configuration, paths with spaces, source-only
+  copies, destination/option rejection, skip-setup and preservation after failure.
+- Executed the actual create CLI with `--skip-setup --port 8097` into a new external
+  temporary directory. Its own static checks and all 11 copied tests passed.
+  Removed only that temporary source fixture afterward; it created no Docker data.
+- The existing runtime initially failed the HTTP main-landmark check because
+  containers still mounted the pre-relocation source path. Ran `npm run start`
+  to recreate the WordPress container using the current paths, preserving volumes.
+- Repeated `npm run verify` successfully: Compose configuration, Composer lock,
+  PHP syntax, WPCS, core version/checksums, active theme/plugin and HTTP landmark.
+- A fresh generated project's Docker installation and browser/editor behavior
+  remain for manual testing. Unit tests simulate setup execution; the external
+  CLI check intentionally skips Docker installation. No reset was performed.
+- The README now explains creation, ports, prerequisites, independent directories,
+  AI instructions, everyday commands and recovery from interrupted installation.
+
+The sections below are historical implementation results.
+
 Validation performed on Windows on 2026-11-05, using Node.js 20.20.1, npm 10.8.2,
 Docker Engine 24.0.7, Compose 2.23.3 and Linux containers.
 
@@ -55,5 +77,6 @@ removed through the interactive reset command; the main project's data was retai
   dependency, network or environment changes. Rerun the documented verification
   commands after changes.
 
-No project Git repository, commits, remote pushes or changes to the parent backup
-were created. Git ignore testing used an ignored disposable bare fixture only.
+At the time of the original validation, no project Git repository, commits or
+remote pushes were created. The generator work above adds the user-authorized
+local commits; no remote push was performed.
