@@ -1,5 +1,18 @@
 # Implementation verification
 
+## Existing destination support — 2026-11-06
+
+- Static verification and all 14 Node tests passed. Added coverage for existing
+  directories, Git metadata preservation, conflicting files/private configuration,
+  blocked parent directories and symbolic links/junctions.
+- Ran `npm run create` with `--skip-setup --port 8098` against a temporary
+  directory initialized with `git init`. Its generated checks passed and the Git
+  configuration hash remained unchanged. Removed only the temporary fixture.
+- `npm run verify` passed against the existing local WordPress installation,
+  including PHP/WPCS, core checksums, active components and HTTP output.
+- No new Docker installation or browser/editor checks were performed for this
+  change. No reset, commit or push was performed.
+
 ## Generator verification — 2026-11-06
 
 - Removed the relocation-only CONTEXT.md and committed the reusable baseline.

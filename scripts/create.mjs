@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { copyFileSync, existsSync, lstatSync, mkdirSync, readdirSync, realpathSync, readFileSync, writeFileSync } from 'node:fs';
+import { constants, copyFileSync, existsSync, lstatSync, mkdirSync, readdirSync, realpathSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, isAbsolute, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { initializeEnvironment } from './environment.mjs';
@@ -26,11 +26,52 @@ function collect(path, files = []) {
   return files;
 }
 
+function inspect(path) {
+  try { return lstatSync(path); } catch (error) {
+    if (error.code === 'ENOENT') return undefined;
+    throw error;
+  }
+}
+
+function checkDestination(target, files) {
+  const targetStat = inspect(target);
+  if (targetStat && (targetStat.isSymbolicLink() || !targetStat.isDirectory())) {
+    throw new Error('Destination must be a directory, not a file or symbolic link.');
+  }
+  const conflicts = new Set();
+  // Inspect every path before writing anything, including the private configuration.
+  for (const file of [...files, '.env']) {
+    const path = resolve(target, file);
+    let parent = dirname(path);
+    const parents = [];
+    while (parent !== target) {
+      parents.unshift(parent);
+      parent = dirname(parent);
+    }
+    let blocked = false;
+    for (const parent of parents) {
+      const stat = inspect(parent);
+      if (stat && (stat.isSymbolicLink() || !stat.isDirectory())) {
+        conflicts.add(relative(target, parent));
+        blocked = true;
+        break;
+      }
+    }
+    if (!blocked && inspect(path)) conflicts.add(file);
+  }
+  if (conflicts.size) {
+    throw new Error(`Destination conflicts (nothing was copied):\n${[...conflicts].map((path) => `- ${path}`).join('\n')}\nMove or rename conflicting files, or choose another directory. Existing files are never overwritten.`);
+  }
+}
+
 export function createProject(destination, { port = '8080', skipSetup = false, run } = {}) {
   if (!destination) throw new Error('Usage: npm run create -- <destination> [--port 8081] [--skip-setup]');
   if (!/^\d+$/.test(String(port)) || Number(port) < 1024 || Number(port) > 65535) throw new Error('--port must be an integer between 1024 and 65535.');
   const target = resolve(destination);
-  if (existsSync(target)) throw new Error('Destination already exists. Choose a new directory; existing projects are never overwritten.');
+  const targetStat = inspect(target);
+  if (targetStat && (targetStat.isSymbolicLink() || !targetStat.isDirectory())) {
+    throw new Error('Destination must be a directory, not a file or symbolic link.');
+  }
   // Resolve ancestor links before checking containment (including Windows junctions).
   let ancestor = dirname(target);
   while (!existsSync(ancestor)) ancestor = dirname(ancestor);
@@ -40,11 +81,11 @@ export function createProject(destination, { port = '8080', skipSetup = false, r
     throw new Error('Destination must be outside the boilerplate directory.');
   }
   const files = sources.flatMap((path) => collect(path));
-  mkdirSync(dirname(target), { recursive: true });
-  mkdirSync(target); // Exclusive directory creation; no merge/overwrite mode.
+  checkDestination(target, files);
+  mkdirSync(target, { recursive: true });
   for (const path of files) {
     mkdirSync(dirname(resolve(target, path)), { recursive: true });
-    copyFileSync(resolve(root, path), resolve(target, path));
+    copyFileSync(resolve(root, path), resolve(target, path), constants.COPYFILE_EXCL);
   }
   const example = resolve(target, '.env.example');
   // Configure only the new project's private env; keep the reusable example intact.
@@ -76,7 +117,7 @@ export function createProject(destination, { port = '8080', skipSetup = false, r
 
 export function main(args = process.argv.slice(2)) {
   if (args.length === 1 && ['--help', '-h'].includes(args[0])) {
-    console.log('Usage: npm run create -- <destination> [--port 8081] [--skip-setup]\nRelative destinations use the current working directory. Destination must not exist.');
+    console.log('Usage: npm run create -- <destination> [--port 8081] [--skip-setup]\nRelative destinations use the current working directory. Existing directories and Git repositories are supported; conflicting files are never overwritten.');
     return;
   }
   const [destination, ...flags] = args;

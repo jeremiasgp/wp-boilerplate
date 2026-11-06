@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { existsSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -40,11 +40,54 @@ test('generated projects contain reusable source and independent environments, w
   assert.deepEqual(calls.map((args) => args.at(-1)), ['verify-static', 'scripts/create.test.mjs', 'setup', 'verify']);
 });
 
-test('existing destinations and invalid options are rejected without modifying files', (t) => {
+test('existing repositories and empty directories are supported without changing Git or unrelated files', (t) => {
+  const directory = fixture(t);
+  mkdirSync(resolve(directory, '.git'));
+  writeFileSync(resolve(directory, '.git/config'), '[core]\n\tbare = false\n');
+  const config = readFileSync(resolve(directory, '.git/config'), 'utf8');
+  writeFileSync(resolve(directory, 'keep.txt'), 'keep');
+  createProject(directory, { skipSetup: true, run: () => {} });
+  assert.equal(readFileSync(resolve(directory, '.git/config'), 'utf8'), config);
+  assert.equal(readFileSync(resolve(directory, 'keep.txt'), 'utf8'), 'keep');
+  assert.ok(existsSync(resolve(directory, 'package.json')));
+  const empty = fixture(t);
+  createProject(empty, { skipSetup: true, run: () => {} });
+  assert.ok(existsSync(resolve(empty, '.env')));
+});
+
+test('conflicts are reported before any files or credentials are created', (t) => {
+  const directory = fixture(t);
+  writeFileSync(resolve(directory, 'README.md'), 'my repository');
+  writeFileSync(resolve(directory, 'package.json'), '{}');
+  const before = readdirSync(directory);
+  assert.throws(() => createProject(directory), /README.md[\s\S]*package.json/);
+  assert.deepEqual(readdirSync(directory), before);
+  assert.equal(readFileSync(resolve(directory, 'README.md'), 'utf8'), 'my repository');
+  const envOnly = fixture(t);
+  writeFileSync(resolve(envOnly, '.env'), 'private existing config');
+  assert.throws(() => createProject(envOnly), /conflicts[\s\S]*\.env/);
+  assert.deepEqual(readdirSync(envOnly), ['.env']);
+  assert.equal(readFileSync(resolve(envOnly, '.env'), 'utf8'), 'private existing config');
+});
+
+test('blocked directories and destination links are rejected without following links', (t) => {
+  const directory = fixture(t);
+  writeFileSync(resolve(directory, 'scripts'), 'existing file');
+  writeFileSync(resolve(directory, 'wp-content'), 'existing content');
+  assert.throws(() => createProject(directory), /conflicts[\s\S]*scripts/);
+  assert.deepEqual(readdirSync(directory), ['scripts', 'wp-content']);
+  const linked = fixture(t);
+  const external = fixture(t);
+  symlinkSync(external, resolve(linked, 'scripts'), process.platform === 'win32' ? 'junction' : 'dir');
+  assert.throws(() => createProject(linked), /conflicts[\s\S]*scripts/);
+  assert.throws(() => createProject(resolve(linked, 'scripts')), /symbolic link/);
+  assert.deepEqual(readdirSync(external), []);
+});
+
+test('invalid options and destinations inside the source are rejected without modifying files', (t) => {
   const directory = fixture(t);
   const marker = resolve(directory, 'keep.txt');
   writeFileSync(marker, 'keep');
-  assert.throws(() => createProject(directory), /already exists/);
   assert.equal(readFileSync(marker, 'utf8'), 'keep');
   const target = resolve(directory, 'new');
   assert.throws(() => createProject(target, { port: '80' }), /port/);

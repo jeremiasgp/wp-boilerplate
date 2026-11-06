@@ -20,7 +20,8 @@ Los cambios de cada sitio se realizan en su propio directorio.
    En macOS/Linux, por ejemplo: `npm run create -- ../mi-sitio`.
    Las rutas relativas se resuelven desde el directorio de ejecución del comando
    (con npm, normalmente la raíz del paquete). Usá una ruta absoluta para evitar dudas.
-   El destino debe estar fuera del boilerplate y no debe existir, aunque esté vacío.
+   El destino debe estar fuera del boilerplate. Puede ser una carpeta nueva,
+   una carpeta vacía existente o un repositorio Git ya creado.
 3. El comando copia solamente la base reutilizable, genera credenciales e identidad
    Docker propias, comprueba los archivos y scripts, instala WordPress y las
    herramientas de calidad y verifica el sitio. No hace falta `npm install`,
@@ -46,6 +47,18 @@ Cada proyecto tiene archivos, contraseñas, identidad y volúmenes Docker propio
 No se copian `.env` del generador, historial Git, dependencias ni cachés, ni se
 inicializa Git. Los proyectos generados funcionan sin depender de la carpeta
 original y no reciben automáticamente sus futuras actualizaciones.
+
+Para usar un repositorio ya creado o clonado, indicá su carpeta como destino:
+
+```powershell
+npm run create -- "C:\Dev\projects\mi-repositorio" --port 8081
+```
+
+Se conservan `.git` y los archivos ajenos al boilerplate. Si hay archivos en
+conflicto (por ejemplo `README.md`, `.gitignore`, `package.json` o `.env`), el
+comando lista los conflictos y se detiene antes de copiar. Mové o renombrá esos
+archivos, o elegí otra carpeta, y volvé a ejecutar el comando. No se sobrescriben
+archivos ni se combinan configuraciones automáticamente.
 
 Para generar archivos sin iniciar Docker, o personalizar la configuración antes
 de instalar WordPress:
